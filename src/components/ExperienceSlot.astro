@@ -1,0 +1,18 @@
+---
+/*
+  Mount point for one future piece (a motion study or a small game).
+
+  When a piece is added:
+  - Keep it in its own module, for example src/experience/pieces/<name>.ts.
+  - Load it only from src/pages/experience.astro, with dynamic import()
+    or an Astro island that the shared layout never imports.
+    Home and about must stay free of that code.
+  - Start it only after this page is open.
+  - Stop it when the visitor leaves (pagehide): cancel animation frames,
+    disconnect observers, remove listeners, and release audio or a game loop.
+  - Honor prefers-reduced-motion before starting motion.
+  - One piece at a time. Unmount the current one before mounting the next.
+*/
+---
+
+<div id="experience-mount" class="experience-slot" data-experience-slot></div>
