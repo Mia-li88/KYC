@@ -1,0 +1,48 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const links = [
+  { href: '/', label: '首页' },
+  { href: '/about', label: '关于' },
+  { href: '/experience', label: '体验' },
+];
+---
+
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip" href="#content">跳到正文</a>
+    <header class="site-header">
+      <a class="brand" href="/">Mia Li</a>
+      <nav class="nav" aria-label="站点">
+        {
+          links.map((link) => (
+            <a href={link.href} aria-current={current === link.href ? 'page' : undefined}>
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+    </header>
+    <main id="content">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>Mia Li</p>
+    </footer>
+  </body>
+</html>
