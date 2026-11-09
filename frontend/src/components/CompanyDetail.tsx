@@ -2,8 +2,8 @@ import { useLocale } from "../i18n/LocaleContext";
 import { overallLabel } from "../i18n/locales";
 import { evaluateCompliance } from "../lib/compliance";
 import type { CompanyDetail as Company } from "../lib/types";
-import { CheckCards } from "./CheckCards";
 import { CompliancePanel } from "./CompliancePanel";
+import { ResultZones } from "./ResultZones";
 import { StatusPill } from "./StatusPill";
 
 export function CompanyDetailPane({ company }: { company: Company | null }) {
@@ -50,7 +50,10 @@ export function CompanyDetailPane({ company }: { company: Company | null }) {
         </header>
 
         <CompliancePanel report={report} />
-        <CheckCards results={company.check_results || []} />
+        <ResultZones
+          evaluations={report.evaluations}
+          checks={company.check_results || []}
+        />
       </div>
     </main>
   );

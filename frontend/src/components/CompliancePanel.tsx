@@ -1,8 +1,9 @@
 import { useLocale } from "../i18n/LocaleContext";
-import { overallLabel, verdictLabel } from "../i18n/locales";
+import { overallLabel } from "../i18n/locales";
 import { complianceGates } from "../lib/compliance";
 import type { ComplianceReport } from "../lib/types";
 
+/** Summary banner + gap list only; gate chips live in ResultZones. */
 export function CompliancePanel({ report }: { report: ComplianceReport }) {
   const { locale, t } = useLocale();
   const title =
@@ -19,20 +20,6 @@ export function CompliancePanel({ report }: { report: ComplianceReport }) {
         <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>{title}</span>
       </div>
       <p style={{ margin: 0, fontSize: "0.88rem", color: "var(--ink-soft)" }}>{policy}</p>
-
-      <div className="gate-grid">
-        {report.evaluations.map((e) => {
-          const cls =
-            e.verdict === "达标" ? "ok" : e.verdict === "欠缺" ? "bad" : "na";
-          const label = locale === "en" ? e.label_en : e.label_zh;
-          return (
-            <div key={e.gate_id} className={`gate-chip ${cls}`}>
-              <span className="verdict">{verdictLabel(locale, e.verdict)}</span>
-              <strong style={{ fontSize: "0.82rem" }}>{label}</strong>
-            </div>
-          );
-        })}
-      </div>
 
       {report.gaps.length > 0 ? (
         <div>
