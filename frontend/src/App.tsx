@@ -125,7 +125,6 @@ export default function App() {
           <div className="brand">
             {t("brand")} <span>{t("brandAccent")}</span>
           </div>
-          <p className="tagline">{t("tagline")}</p>
         </div>
         <div className="top-actions">
           <div className="lang-toggle" role="group" aria-label={t("langToggleAria")}>

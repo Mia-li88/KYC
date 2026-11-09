@@ -5,7 +5,6 @@ export const DEFAULT_LOCALE: Locale = "zh-CN";
 const zhCN = {
   brand: "KYC",
   brandAccent: "审查工作台",
-  tagline: "香港建造业分判商预审 — Auto / Semi / HITL 检查与合规门槛（达标 · 欠缺 · 红灯）",
   refreshQueue: "刷新队列",
   langEn: "EN",
   langZh: "中文",
@@ -18,9 +17,9 @@ const zhCN = {
   placeholderNameZh: "中文名称",
   placeholderTrades: "工种：electrical,general",
   liveOnlyHint: "始终调用实时开放数据 API（公司注册处 / 机电署 / 劳工处等）；网络失败会显示为错误／红灯。",
-  runBusy: "运行中…",
-  runSubmit: "运行 Auto → Semi → HITL",
-  runSubmitLive: "实时检查 Auto → Semi → HITL",
+  runBusy: "查询中…",
+  runSubmit: "查询",
+  runSubmitLive: "查询",
   unnamedCompany: "未命名公司",
 
   statusRunningAuto: "自动检查中",
@@ -30,7 +29,7 @@ const zhCN = {
 
   detailTitle: "公司详情",
   detailEmpty: "请从左侧队列选择公司，或开始新的检查。",
-  seedOnlyHint: "此为队列种子条目，尚未运行实时检查。请在左侧填写后点击「实时检查」。",
+  seedOnlyHint: "此为队列种子条目，尚未查询。请在左侧填写后点击「查询」。",
   trades: "工种",
   fixtureDemo: "演示数据",
   overallPass: "达标",
@@ -76,8 +75,6 @@ const zhCN = {
 const en: { [K in keyof typeof zhCN]: string } = {
   brand: "KYC",
   brandAccent: "Workbench",
-  tagline:
-    "Hong Kong construction subcontractor review — Auto / Semi / HITL checks with compliance gating (Pass · Gap · Red flag).",
   refreshQueue: "Refresh queue",
   langEn: "EN",
   langZh: "中文",
@@ -91,9 +88,9 @@ const en: { [K in keyof typeof zhCN]: string } = {
   placeholderTrades: "trades: electrical,general",
   liveOnlyHint:
     "Always calls live open-data APIs (CR / EMSD / LD, etc.); network failures surface as errors / red flags.",
-  runBusy: "Running…",
-  runSubmit: "Run Auto → Semi → HITL",
-  runSubmitLive: "Live check Auto → Semi → HITL",
+  runBusy: "Querying…",
+  runSubmit: "Query",
+  runSubmitLive: "Query",
   unnamedCompany: "Unnamed company",
 
   statusRunningAuto: "Running Auto",
@@ -103,8 +100,7 @@ const en: { [K in keyof typeof zhCN]: string } = {
 
   detailTitle: "Company detail",
   detailEmpty: "Select a company from the queue, or start a new check.",
-  seedOnlyHint:
-    "Seed queue entry — no live check yet. Use the left form and click Live check.",
+  seedOnlyHint: "Seed queue entry — not queried yet. Use the left form and click Query.",
   trades: "Trades",
   fixtureDemo: "Fixture demo",
   overallPass: "Pass",
