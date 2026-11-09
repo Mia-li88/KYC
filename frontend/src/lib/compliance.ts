@@ -32,6 +32,41 @@ function matchCount(check?: CheckResult): number | undefined {
   return typeof raw === "number" ? raw : undefined;
 }
 
+function dataRequirementsFail(
+  gate: ComplianceGate,
+  check: CheckResult,
+  stubOk: boolean,
+): boolean {
+  const req = gate.require_data;
+  if (!req) return false;
+  const data = check.data || {};
+
+  if (req.match_count_max !== undefined) {
+    const count = matchCount(check);
+    if (count === undefined && !stubOk) return true;
+    if (typeof count === "number" && count > req.match_count_max) return true;
+  }
+
+  if (req.found === true) {
+    if (data.found !== true) return true;
+  }
+
+  if (req.record_has_brn === true) {
+    const records = data.records;
+    if (!Array.isArray(records) || records.length === 0) return true;
+    const hasBrn = records.some(
+      (r) =>
+        r &&
+        typeof r === "object" &&
+        typeof (r as { brn?: unknown }).brn === "string" &&
+        Boolean(String((r as { brn?: string }).brn).trim()),
+    );
+    if (!hasBrn) return true;
+  }
+
+  return false;
+}
+
 function thresholds(gate: ComplianceGate): Pick<GateEvaluation, "threshold_zh" | "threshold_en"> {
   return {
     threshold_zh: gate.threshold_zh,
@@ -100,20 +135,13 @@ function evaluateGate(
   const pass = (gate.pass_statuses || ["pass"]).includes(status);
   const fail = (gate.fail_statuses || ["fail", "error"]).includes(status);
   const unknown = (gate.unknown_statuses || []).includes(status);
-  const stubOk = gate.allow_stub_pass && status === "stub";
+  const stubOk = Boolean(gate.allow_stub_pass) && status === "stub";
 
-  let dataFail = false;
-  if (gate.require_data?.match_count_max !== undefined) {
-    const count = matchCount(check);
-    if (count === undefined && !stubOk) {
-      dataFail = true;
-    } else if (typeof count === "number" && count > gate.require_data.match_count_max) {
-      dataFail = true;
-    }
-  }
+  const dataFail = dataRequirementsFail(gate, check, stubOk);
 
   const result = resultFromCheck(check, `状态：${status}`, `Status: ${status}`);
 
+  // Never treat "user typed a BRN" as pass — require tool PASS + data requirements.
   if ((pass || stubOk) && !dataFail && !fail) {
     return {
       ...base,

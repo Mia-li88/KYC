@@ -18,10 +18,14 @@
       "fail_statuses": ["fail", "error"],
       "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
       "unknown_as_red": true,
-      "threshold_zh": "须为公司注册处开放数据可查之现存公司（有 BRN／中英文法定名称）。",
-      "threshold_en": "Must appear as a live company on Companies Registry open data (BRN / bilingual legal name).",
-      "gap_hint_zh": "未证明为现存公司（公司注册处开放数据）",
-      "gap_hint_en": "Not proven live on Companies Registry open data"
+      "require_data": {
+        "found": true,
+        "record_has_brn": true
+      },
+      "threshold_zh": "须为公司注册处开放数据可查之现存公司（API 返回命中且含 Brn）。仅用户填写 BRN 不算达标。",
+      "threshold_en": "Must be found as a live company on CR open data (API match with Brn). User-supplied BRN alone is not sufficient.",
+      "gap_hint_zh": "未在公司注册处开放数据查得现存公司（或请求失败）",
+      "gap_hint_en": "Not found as a live company on CR open data (or request failed)"
     },
     {
       "id": "emsd_rec_if_electrical",

@@ -83,7 +83,13 @@ export interface ComplianceGate {
   unknown_statuses?: string[];
   unknown_as_red?: boolean;
   allow_stub_pass?: boolean;
-  require_data?: { match_count_max?: number };
+  require_data?: {
+    match_count_max?: number;
+    /** CR live company: data.found must be true */
+    found?: boolean;
+    /** At least one record in data.records must include brn */
+    record_has_brn?: boolean;
+  };
   threshold_zh: string;
   threshold_en: string;
   gap_hint_zh: string;

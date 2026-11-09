@@ -117,6 +117,24 @@ def test_brn_preferred_over_name():
             client=client,
         )
     assert res.status.value == "pass"
+    assert out.found is True
     assert out.records[0].brn == "C1572528"
     attempts = out.query.get("attempts") or []
     assert attempts[0]["mode"] == "brn_equal"
+
+
+def test_unknown_brn_is_fail_not_pass():
+    """User-supplied BRN with empty open-data result must FAIL (not pass)."""
+
+    class EmptyBrnTransport(httpx.BaseTransport):
+        def handle_request(self, request: httpx.Request) -> httpx.Response:  # type: ignore[override]
+            return httpx.Response(200, json=[])
+
+    with httpx.Client(transport=EmptyBrnTransport()) as client:
+        out, res = cr_opendata_lookup(
+            CRLookupInput(brn="FAKEUSERBRN"),
+            client=client,
+        )
+    assert out.found is False
+    assert res.status.value == "fail"
+    assert "not sufficient" in res.summary.lower() or "No live company" in res.summary

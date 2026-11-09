@@ -247,15 +247,17 @@ def cr_opendata_lookup(
                     records = rank_records(found, inp.company_name)
                     break
 
+        # Live match = API returned ≥1 record with a Brn. User-supplied BRN alone ≠ pass.
+        live = [r for r in records if (r.brn or "").strip()]
         out = CRLookupOutput(
-            found=bool(records),
-            records=records,
+            found=bool(live),
+            records=live or records,
             query={**used_params, "attempts": attempts},
         )
-        if records:
-            top = records[0]
+        if live:
+            top = live[0]
             summary = (
-                f"Found {len(records)} live company record(s); "
+                f"Found {len(live)} live company record(s); "
                 f"top={top.english_company_name or top.chinese_company_name} "
                 f"(BRN={top.brn})"
             )
@@ -267,9 +269,10 @@ def cr_opendata_lookup(
             status_enum = CheckStatus.ERROR
         else:
             summary = (
-                "No live company matched (dissolved/struck-off usually omitted)"
+                "No live company matched on CR open data "
+                "(user-supplied BRN/name alone is not sufficient)"
             )
-            status_enum = CheckStatus.WARN
+            status_enum = CheckStatus.FAIL
 
         notes = [
             "Comp_name uses begins_with only (equal returns HTTP 400).",
