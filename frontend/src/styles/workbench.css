@@ -274,6 +274,18 @@ select {
   color: var(--ok);
 }
 
+.status-queued {
+  background: #e5e7ea;
+  color: #4b5560;
+}
+
+.live-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
 .detail {
   padding: 1rem 1.15rem 2rem;
   display: grid;

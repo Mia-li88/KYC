@@ -17,17 +17,20 @@ const zhCN = {
   placeholderNameEn: "英文名称",
   placeholderNameZh: "中文名称",
   placeholderTrades: "工种：electrical,general",
-  offline: "离线模式（不请求实时 HTTP）",
+  liveOnlyHint: "始终调用实时开放数据 API（公司注册处 / 机电署 / 劳工处等）；网络失败会显示为错误／红灯。",
   runBusy: "运行中…",
   runSubmit: "运行 Auto → Semi → HITL",
+  runSubmitLive: "实时检查 Auto → Semi → HITL",
   unnamedCompany: "未命名公司",
 
   statusRunningAuto: "自动检查中",
   statusAwaitingHitl: "待人工确认",
   statusSummarized: "已汇总",
+  statusQueued: "待实时检查",
 
   detailTitle: "公司详情",
   detailEmpty: "请从左侧队列选择公司，或开始新的检查。",
+  seedOnlyHint: "此为队列种子条目，尚未运行实时检查。请在左侧填写后点击「实时检查」。",
   trades: "工种",
   fixtureDemo: "演示数据",
   overallPass: "达标",
@@ -86,17 +89,22 @@ const en: { [K in keyof typeof zhCN]: string } = {
   placeholderNameEn: "English name",
   placeholderNameZh: "Chinese name",
   placeholderTrades: "trades: electrical,general",
-  offline: "Offline (no live HTTP)",
+  liveOnlyHint:
+    "Always calls live open-data APIs (CR / EMSD / LD, etc.); network failures surface as errors / red flags.",
   runBusy: "Running…",
   runSubmit: "Run Auto → Semi → HITL",
+  runSubmitLive: "Live check Auto → Semi → HITL",
   unnamedCompany: "Unnamed company",
 
   statusRunningAuto: "Running Auto",
   statusAwaitingHitl: "Awaiting HITL",
   statusSummarized: "Summarized",
+  statusQueued: "Queued for live check",
 
   detailTitle: "Company detail",
   detailEmpty: "Select a company from the queue, or start a new check.",
+  seedOnlyHint:
+    "Seed queue entry — no live check yet. Use the left form and click Live check.",
   trades: "Trades",
   fixtureDemo: "Fixture demo",
   overallPass: "Pass",
@@ -174,6 +182,8 @@ export function statusLabel(locale: Locale, status: string): string {
       return m.statusAwaitingHitl;
     case "summarized":
       return m.statusSummarized;
+    case "queued":
+      return m.statusQueued;
     default:
       return status;
   }

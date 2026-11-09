@@ -1,32 +1,32 @@
 [
   {
-    "thread_id": "fixture-pass-electrical",
+    "thread_id": "seed-c1572528",
     "brn": "C1572528",
     "legal_name_en": "GOLDEN SPARK ENGINEERING LTD",
     "legal_name_zh": "金光工程有限公司",
-    "status": "summarized",
+    "status": "queued",
     "requested_trades": ["electrical", "general"],
     "fixture": true,
-    "summary": "Demo: CR live + EMSD REC + clean OSH — 达标"
+    "summary": null
   },
   {
-    "thread_id": "fixture-awaiting-hitl",
+    "thread_id": "seed-harbour",
     "brn": "C9988776",
     "legal_name_en": "HARBOUR PIPEWORKS CO LTD",
-    "legal_name_zh": "海港喉務有限公司",
-    "status": "awaiting_hitl",
+    "legal_name_zh": "海港喉务有限公司",
+    "status": "queued",
     "requested_trades": ["plumbing", "general"],
     "fixture": true,
     "summary": null
   },
   {
-    "thread_id": "fixture-red-light",
+    "thread_id": "seed-risky",
     "brn": "C4455667",
     "legal_name_en": "RISKY SITE SERVICES LTD",
-    "legal_name_zh": "高危地盤服務有限公司",
-    "status": "summarized",
+    "legal_name_zh": "高危地盘服务有限公司",
+    "status": "queued",
     "requested_trades": ["electrical", "fire", "general"],
     "fixture": true,
-    "summary": "Demo: OSH conviction hit + missing EMSD REC — 红灯"
+    "summary": null
   }
 ]

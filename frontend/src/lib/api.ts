@@ -25,14 +25,14 @@ export function startRun(body: {
   legal_name_en?: string;
   legal_name_zh?: string;
   requested_trades?: string[];
-  offline?: boolean;
   thread_id?: string;
   require_track_record?: boolean;
 }): Promise<CompanyDetail> {
+  // Always live — API ignores offline unless KYC_ALLOW_OFFLINE=1 (tests).
   return request("/runs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, offline: false }),
   });
 }
 

@@ -15,7 +15,7 @@ Source-of-truth research (endpoints not invented): see project store docs
 
 ```
 src/kyc_agent/          # LangGraph graph + tools
-api/                    # FastAPI shim (invoke / resume / fixtures)
+api/                    # FastAPI shim (live invoke / resume; queue seed metadata)
 frontend/               # Vite React workbench (queue · detail · HITL)
 examples/run_demo.py
 ```
@@ -31,22 +31,22 @@ cd frontend && npm install && cd ..
 
 ## Run frontend + backend together
 
-**Terminal A — API (LangGraph + fixtures):**
+**Terminal A — API (LangGraph, live HTTP by default):**
 
 ```bash
 source .venv/bin/activate
-uvicorn api.server:app --reload --host 127.0.0.1 --port 8000
+uvicorn api.server:app --reload --host 0.0.0.0 --port 8000
 ```
 
 **Terminal B — Workbench UI:**
 
 ```bash
-cd frontend && npm run dev
+cd frontend && npm run dev -- --host 0.0.0.0 --port 5173
 ```
 
 Open http://127.0.0.1:5173 — Vite proxies `/companies`, `/runs`, … to the API.
 
-Demo fixtures load automatically (pass / awaiting HITL / 红灯). Use **Start check** to invoke the real offline graph (HITL interrupt → upload → Confirm & resume → `Command(resume=…)`).
+Queue seeds are identity-only. **Start check / 实时检查** always runs live CR / EMSD / LD (etc.); network failures surface as errors / 红灯. HITL interrupt → upload → Confirm & resume → `Command(resume=…)`.
 
 ### Compliance / 红灯
 

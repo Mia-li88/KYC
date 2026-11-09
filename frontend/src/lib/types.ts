@@ -1,4 +1,9 @@
-export type QueueStatus = "running_auto" | "awaiting_hitl" | "summarized" | string;
+export type QueueStatus =
+  | "queued"
+  | "running_auto"
+  | "awaiting_hitl"
+  | "summarized"
+  | string;
 
 export type AccessClass = "auto" | "semi" | "hitl";
 
@@ -40,6 +45,7 @@ export interface QueueCompany {
   status: QueueStatus;
   requested_trades?: string[];
   fixture?: boolean;
+  seed_only?: boolean;
   summary?: string | null;
 }
 
@@ -53,8 +59,10 @@ export interface CompanyDetail extends QueueCompany {
   interrupted?: boolean;
   interrupt_message?: string;
   errors?: string[];
+  network_errors?: string[];
   check_results?: CheckResult[];
   pending_human?: PendingHumanItem[];
+  live?: boolean;
 }
 
 export interface GateWhen {

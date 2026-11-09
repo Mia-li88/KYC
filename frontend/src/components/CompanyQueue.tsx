@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "../i18n/LocaleContext";
 import type { QueueCompany } from "../lib/types";
 import { StatusPill } from "./StatusPill";
@@ -6,24 +6,41 @@ import { StatusPill } from "./StatusPill";
 interface Props {
   companies: QueueCompany[];
   selectedId?: string | null;
+  selectedCompany?: QueueCompany | null;
   onSelect: (threadId: string) => void;
   onStart: (payload: {
     brn: string;
     legal_name_en: string;
     legal_name_zh: string;
     trades: string[];
-    offline: boolean;
+    thread_id?: string;
   }) => void;
   busy?: boolean;
 }
 
-export function CompanyQueue({ companies, selectedId, onSelect, onStart, busy }: Props) {
+export function CompanyQueue({
+  companies,
+  selectedId,
+  selectedCompany,
+  onSelect,
+  onStart,
+  busy,
+}: Props) {
   const { t } = useLocale();
-  const [brn, setBrn] = useState("FAKE1234");
-  const [en, setEn] = useState("DEMO BUILDING CO LTD");
-  const [zh, setZh] = useState("示范建筑有限公司");
+  const [brn, setBrn] = useState("C1572528");
+  const [en, setEn] = useState("");
+  const [zh, setZh] = useState("");
   const [trades, setTrades] = useState("electrical,general");
-  const [offline, setOffline] = useState(true);
+
+  useEffect(() => {
+    if (!selectedCompany) return;
+    if (selectedCompany.brn) setBrn(selectedCompany.brn);
+    if (selectedCompany.legal_name_en) setEn(selectedCompany.legal_name_en);
+    if (selectedCompany.legal_name_zh) setZh(selectedCompany.legal_name_zh);
+    if (selectedCompany.requested_trades?.length) {
+      setTrades(selectedCompany.requested_trades.join(","));
+    }
+  }, [selectedCompany]);
 
   return (
     <aside className="pane">
@@ -40,12 +57,16 @@ export function CompanyQueue({ companies, selectedId, onSelect, onStart, busy }:
             brn: brn.trim(),
             legal_name_en: en.trim(),
             legal_name_zh: zh.trim(),
-            trades: trades.split(",").map((t) => t.trim()).filter(Boolean),
-            offline,
+            trades: trades.split(",").map((x) => x.trim()).filter(Boolean),
+            thread_id:
+              selectedCompany?.seed_only || selectedCompany?.status === "queued"
+                ? undefined
+                : selectedId || undefined,
           });
         }}
       >
         <strong style={{ fontSize: "0.85rem" }}>{t("startCheck")}</strong>
+        <p className="live-hint">{t("liveOnlyHint")}</p>
         <input value={brn} onChange={(e) => setBrn(e.target.value)} placeholder={t("placeholderBrn")} />
         <input value={en} onChange={(e) => setEn(e.target.value)} placeholder={t("placeholderNameEn")} />
         <input value={zh} onChange={(e) => setZh(e.target.value)} placeholder={t("placeholderNameZh")} />
@@ -54,12 +75,8 @@ export function CompanyQueue({ companies, selectedId, onSelect, onStart, busy }:
           onChange={(e) => setTrades(e.target.value)}
           placeholder={t("placeholderTrades")}
         />
-        <label className="confirm">
-          <input type="checkbox" checked={offline} onChange={(e) => setOffline(e.target.checked)} />
-          {t("offline")}
-        </label>
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? t("runBusy") : t("runSubmit")}
+          {busy ? t("runBusy") : t("runSubmitLive")}
         </button>
       </form>
 

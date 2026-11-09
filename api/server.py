@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import tempfile
 import uuid
@@ -21,6 +22,9 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 UPLOAD_ROOT = Path(tempfile.gettempdir()) / "kyc-workbench-uploads"
 UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 
+# Tests only: KYC_ALLOW_OFFLINE=1 lets /runs honor offline=true. Production always live.
+_ALLOW_OFFLINE = os.environ.get("KYC_ALLOW_OFFLINE", "").lower() in ("1", "true", "yes")
+
 # Process-wide graph + MemorySaver so thread_id resumes work across requests.
 _GRAPH = build_kyc_graph()
 
@@ -29,12 +33,21 @@ _QUEUE: dict[str, dict[str, Any]] = {}
 
 
 def _load_fixture_queue() -> None:
+    """Seed company list only — not a substitute for live checks."""
     path = FIXTURES_DIR / "queue.json"
     if not path.exists():
         return
     data = json.loads(path.read_text(encoding="utf-8"))
     for row in data:
-        _QUEUE[row["thread_id"]] = row
+        entry = dict(row)
+        entry["status"] = entry.get("status") if entry.get("status") in {
+            "awaiting_hitl",
+            "running_auto",
+            "summarized",
+        } and not entry.get("fixture") else "queued"
+        entry["fixture"] = True  # seed row until a live run replaces it
+        entry["seed_only"] = True
+        _QUEUE[row["thread_id"]] = entry
 
 
 _load_fixture_queue()
@@ -57,14 +70,13 @@ class StartRunRequest(BaseModel):
     requested_trades: list[str] = Field(
         default_factory=lambda: [TradeKind.ELECTRICAL.value, TradeKind.GENERAL.value]
     )
-    offline: bool = True
+    offline: bool = False
+    """Ignored unless KYC_ALLOW_OFFLINE=1 (tests). Production always runs live HTTP."""
     require_financials: bool = True
     require_insurance: bool = True
     require_safety_docs: bool = True
     require_track_record: bool = False
     thread_id: Optional[str] = None
-    use_fixture: Optional[str] = None
-    """If set, load fixture company detail instead of invoking the live graph."""
 
 
 class ResumeRequest(BaseModel):
@@ -90,30 +102,31 @@ def _queue_status(view: dict[str, Any], interrupted: bool) -> str:
         return "awaiting_hitl"
     if view.get("summary"):
         return "summarized"
-    if view.get("auto_done") and not view.get("semi_done"):
-        return "running_auto"
+    if view.get("seed_only") and not view.get("auto_done"):
+        return "queued"
     if view.get("auto_done") or view.get("semi_done"):
         return "running_auto"
     return "running_auto"
 
 
-def _enrich(thread_id: str, raw: dict[str, Any], *, fixture: bool = False) -> dict[str, Any]:
+def _enrich(thread_id: str, raw: dict[str, Any], *, seed_only: bool = False) -> dict[str, Any]:
     interrupt = _interrupt_payload(raw)
-    view = _public_view(raw) if not fixture else dict(raw)
+    view = dict(raw) if seed_only else _public_view(raw)
     if interrupt:
-        # LangGraph interrupt value uses {"message", "pending"}; surface as pending_human.
         pending = interrupt.get("pending")
         if pending is not None:
             view["pending_human"] = pending
         view["awaiting_human"] = True
         if interrupt.get("message"):
             view["interrupt_message"] = interrupt.get("message")
-    status = _queue_status(view, interrupted=bool(interrupt))
+    status = _queue_status({**view, "seed_only": seed_only}, interrupted=bool(interrupt))
     view["thread_id"] = thread_id
     view["status"] = status
     view["interrupted"] = bool(interrupt)
     view["requested_trades"] = raw.get("requested_trades") or view.get("requested_trades") or []
-    view["fixture"] = fixture
+    view["fixture"] = False
+    view["seed_only"] = seed_only
+    view["live"] = not seed_only
     return view
 
 
@@ -126,68 +139,82 @@ def _upsert_queue(view: dict[str, Any]) -> None:
         "legal_name_zh": view.get("legal_name_zh"),
         "status": view.get("status"),
         "requested_trades": view.get("requested_trades") or [],
-        "fixture": bool(view.get("fixture")),
+        "fixture": False,
+        "seed_only": bool(view.get("seed_only")),
         "summary": view.get("summary"),
     }
 
 
+def _seed_detail(thread_id: str) -> Optional[dict[str, Any]]:
+    """Identity-only seed from queue.json — no fabricated check results."""
+    row = _QUEUE.get(thread_id)
+    if not row:
+        return None
+    return _enrich(
+        thread_id,
+        {
+            "brn": row.get("brn"),
+            "legal_name_en": row.get("legal_name_en"),
+            "legal_name_zh": row.get("legal_name_zh"),
+            "requested_trades": row.get("requested_trades") or [],
+            "check_results": [],
+            "pending_human": [],
+            "errors": [],
+            "summary": None,
+            "awaiting_human": False,
+            "auto_done": False,
+            "semi_done": False,
+            "hitl_done": False,
+        },
+        seed_only=True,
+    )
+
+
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, Any]:
+    return {"status": "ok", "live_default": True, "allow_offline": _ALLOW_OFFLINE}
 
 
 @app.get("/companies")
 def list_companies() -> list[dict[str, Any]]:
     """Left-pane queue: BRN / bilingual names / status."""
     rows = list(_QUEUE.values())
-    order = {"awaiting_hitl": 0, "running_auto": 1, "summarized": 2}
+    order = {"awaiting_hitl": 0, "running_auto": 1, "queued": 2, "summarized": 3}
     rows.sort(key=lambda r: (order.get(str(r.get("status")), 9), str(r.get("brn") or "")))
     return rows
 
 
 @app.get("/companies/{thread_id}")
 def get_company(thread_id: str) -> dict[str, Any]:
-    """Company detail: identity + check results (+ interrupt pending)."""
-    fixture_path = FIXTURES_DIR / f"{thread_id}.json"
+    """Company detail: live graph state, or seed identity only (no fixture results)."""
     config = {"configurable": {"thread_id": thread_id}}
     snap = _GRAPH.get_state(config)
     values = dict(snap.values or {})
 
-    # Live graph state wins once the thread has been invoked.
     if values or snap.next:
         if snap.next and snap.tasks:
             for task in snap.tasks:
                 if task.interrupts:
                     values["__interrupt__"] = list(task.interrupts)
                     break
-        view = _enrich(thread_id, values, fixture=False)
+        view = _enrich(thread_id, values, seed_only=False)
         _upsert_queue(view)
         return view
 
-    if fixture_path.exists():
-        data = json.loads(fixture_path.read_text(encoding="utf-8"))
-        view = _enrich(thread_id, data, fixture=True)
-        _upsert_queue(view)
-        return view
+    seed = _seed_detail(thread_id)
+    if seed:
+        return seed
 
     raise HTTPException(404, f"Unknown thread_id={thread_id}")
 
 
 @app.post("/runs")
 def start_run(body: StartRunRequest) -> dict[str, Any]:
-    """Invoke kyc_agent until HITL interrupt or summarize."""
-    if body.use_fixture:
-        path = FIXTURES_DIR / f"{body.use_fixture}.json"
-        if not path.exists():
-            raise HTTPException(404, f"Fixture {body.use_fixture} not found")
-        data = json.loads(path.read_text(encoding="utf-8"))
-        tid = body.thread_id or body.use_fixture
-        view = _enrich(tid, data, fixture=True)
-        _upsert_queue(view)
-        return view
-
+    """Always invoke live HTTP tools unless KYC_ALLOW_OFFLINE=1 for tests."""
     if not body.brn and not body.legal_name_en and not body.legal_name_zh:
         raise HTTPException(400, "Provide brn and/or legal_name_en / legal_name_zh")
+
+    offline = bool(body.offline) if _ALLOW_OFFLINE else False
 
     thread_id = body.thread_id or f"run-{uuid.uuid4().hex[:10]}"
     trades: list[str] = []
@@ -209,7 +236,7 @@ def start_run(body: StartRunRequest) -> dict[str, Any]:
         "require_insurance": body.require_insurance,
         "require_safety_docs": body.require_safety_docs,
         "require_track_record": body.require_track_record,
-        "offline": body.offline,
+        "offline": offline,
         "thread_id": thread_id,
         "check_results": [],
         "errors": [],
@@ -222,8 +249,19 @@ def start_run(body: StartRunRequest) -> dict[str, Any]:
         "hitl_done": False,
     }
     config = {"configurable": {"thread_id": thread_id}}
-    raw = _GRAPH.invoke(initial, config=config)
-    view = _enrich(thread_id, dict(raw), fixture=False)
+    try:
+        raw = _GRAPH.invoke(initial, config=config)
+    except Exception as exc:  # network / tool hard failures
+        raise HTTPException(
+            status_code=502,
+            detail=f"Live KYC invoke failed: {type(exc).__name__}: {exc}",
+        ) from exc
+
+    view = _enrich(thread_id, dict(raw), seed_only=False)
+    # Surface tool-level errors in status messaging for the UI
+    errors = list(view.get("errors") or [])
+    if errors:
+        view["network_errors"] = errors
     _upsert_queue(view)
     return view
 
@@ -235,8 +273,14 @@ def resume_run(thread_id: str, body: ResumeRequest) -> dict[str, Any]:
     snap = _GRAPH.get_state(config)
     if not snap.next:
         raise HTTPException(400, "Thread is not awaiting resume (no interrupt)")
-    raw = _GRAPH.invoke(Command(resume=body.resume), config=config)
-    view = _enrich(thread_id, dict(raw), fixture=False)
+    try:
+        raw = _GRAPH.invoke(Command(resume=body.resume), config=config)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Live KYC resume failed: {type(exc).__name__}: {exc}",
+        ) from exc
+    view = _enrich(thread_id, dict(raw), seed_only=False)
     _upsert_queue(view)
     return view
 
@@ -259,7 +303,13 @@ async def upload_file(
 
 @app.get("/compliance/gates")
 def get_gates() -> dict[str, Any]:
-    path = Path(__file__).resolve().parent.parent / "frontend" / "src" / "config" / "compliance_gates.json"
+    path = (
+        Path(__file__).resolve().parent.parent
+        / "frontend"
+        / "src"
+        / "config"
+        / "compliance_gates.json"
+    )
     if not path.exists():
         raise HTTPException(404, "compliance_gates.json missing")
     return json.loads(path.read_text(encoding="utf-8"))
@@ -268,7 +318,7 @@ def get_gates() -> dict[str, Any]:
 def main() -> None:
     import uvicorn
 
-    uvicorn.run("api.server:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("api.server:app", host="0.0.0.0", port=8000, reload=True)
 
 
 if __name__ == "__main__":

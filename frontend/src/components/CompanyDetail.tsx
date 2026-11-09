@@ -45,15 +45,22 @@ export function CompanyDetailPane({ company }: { company: Company | null }) {
               {t("trades")}{" "}
               <code>{(company.requested_trades || []).join(", ") || "—"}</code>
             </span>
-            {company.fixture ? <span>{t("fixtureDemo")}</span> : null}
+            {company.seed_only ? <span>{t("statusQueued")}</span> : null}
+            {company.live ? <span>Live</span> : null}
           </div>
         </header>
 
-        <CompliancePanel report={report} />
-        <ResultZones
-          evaluations={report.evaluations}
-          checks={company.check_results || []}
-        />
+        {company.seed_only ? (
+          <p className="empty">{t("seedOnlyHint")}</p>
+        ) : (
+          <>
+            <CompliancePanel report={report} />
+            <ResultZones
+              evaluations={report.evaluations}
+              checks={company.check_results || []}
+            />
+          </>
+        )}
       </div>
     </main>
   );
