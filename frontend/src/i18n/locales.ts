@@ -43,6 +43,8 @@ const zhCN = {
   zonePass: "达标",
   zoneLeftEmpty: "暂无未达标或不适用项",
   zoneRightEmpty: "暂无达标项",
+  resultLineLabel: "本查询：",
+  thresholdLineLabel: "合规门槛：",
   itemGate: "门槛",
   itemCheck: "检查",
 
@@ -100,6 +102,8 @@ const en: { [K in keyof typeof zhCN]: string } = {
   zonePass: "Pass",
   zoneLeftEmpty: "No gaps or N/A items",
   zoneRightEmpty: "No passing items yet",
+  resultLineLabel: "This query: ",
+  thresholdLineLabel: "HK threshold: ",
   itemGate: "Gate",
   itemCheck: "Check",
 

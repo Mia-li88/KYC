@@ -84,6 +84,8 @@ export interface ComplianceGate {
   unknown_as_red?: boolean;
   allow_stub_pass?: boolean;
   require_data?: { match_count_max?: number };
+  threshold_zh: string;
+  threshold_en: string;
   gap_hint_zh: string;
   gap_hint_en: string;
 }
@@ -93,7 +95,7 @@ export interface ComplianceGatesConfig {
   title_zh: string;
   title_en: string;
   source_docs: string[];
-  red_light_policy: { zh: string; en: string };
+  red_light_policy?: { zh: string; en: string };
   gates: ComplianceGate[];
 }
 
@@ -108,6 +110,12 @@ export interface GateEvaluation {
   red: boolean;
   tool?: string;
   check_status?: string;
+  /** Line 1: this query's company result/condition */
+  result_zh: string;
+  result_en: string;
+  /** Line 2: HK construction compliance threshold for this item */
+  threshold_zh: string;
+  threshold_en: string;
   reason_zh: string;
   reason_en: string;
 }

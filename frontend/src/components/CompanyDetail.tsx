@@ -1,13 +1,11 @@
 import { useLocale } from "../i18n/LocaleContext";
-import { overallLabel } from "../i18n/locales";
 import { evaluateCompliance } from "../lib/compliance";
 import type { CompanyDetail as Company } from "../lib/types";
-import { CompliancePanel } from "./CompliancePanel";
 import { ResultZones } from "./ResultZones";
 import { StatusPill } from "./StatusPill";
 
 export function CompanyDetailPane({ company }: { company: Company | null }) {
-  const { locale, t } = useLocale();
+  const { t } = useLocale();
 
   if (!company) {
     return (
@@ -32,9 +30,6 @@ export function CompanyDetailPane({ company }: { company: Company | null }) {
         <header className="identity">
           <div className="identity-top">
             <h1>{company.legal_name_en || "—"}</h1>
-            <span className={`badge ${report.red ? "badge-fail" : "badge-pass"}`}>
-              {overallLabel(locale, report.overall)}
-            </span>
           </div>
           {company.legal_name_zh ? <p className="zh">{company.legal_name_zh}</p> : null}
           <div className="meta-row">
@@ -53,13 +48,7 @@ export function CompanyDetailPane({ company }: { company: Company | null }) {
         {company.seed_only ? (
           <p className="empty">{t("seedOnlyHint")}</p>
         ) : (
-          <>
-            <CompliancePanel report={report} />
-            <ResultZones
-              evaluations={report.evaluations}
-              checks={company.check_results || []}
-            />
-          </>
+          <ResultZones evaluations={report.evaluations} />
         )}
       </div>
     </main>

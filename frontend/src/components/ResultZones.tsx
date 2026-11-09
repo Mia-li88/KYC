@@ -1,92 +1,62 @@
 import { useLocale } from "../i18n/LocaleContext";
-import { checkStatusLabel, verdictLabel } from "../i18n/locales";
-import type { CheckResult, GateEvaluation } from "../lib/types";
+import { verdictLabel } from "../i18n/locales";
+import type { GateEvaluation } from "../lib/types";
 
 type ZoneKind = "not_pass" | "na" | "pass";
 
 interface ZoneItem {
   id: string;
   kind: ZoneKind;
-  source: "gate" | "check";
   title: string;
-  subtitle: string;
+  resultLine: string;
+  thresholdLine: string;
   badge: string;
-  accessClass?: string;
-}
-
-function dedupeChecks(results: CheckResult[]): CheckResult[] {
-  const map = new Map<string, CheckResult>();
-  for (const r of results) map.set(r.tool, r);
-  return [...map.values()];
-}
-
-function checkZone(status: string): ZoneKind {
-  if (status === "pass") return "pass";
-  if (status === "skipped") return "na";
-  return "not_pass";
 }
 
 function ZoneCard({ item }: { item: ZoneItem }) {
+  const { t } = useLocale();
   const tone =
     item.kind === "pass" ? "pass" : item.kind === "na" ? "na" : "not-pass";
   return (
     <article className={`zone-card zone-card-${tone}`}>
       <header>
-        <span className="zone-card-meta">
-          {item.source === "gate" ? item.accessClass || "gate" : item.accessClass}
-        </span>
-        <span className={`badge badge-${item.kind === "pass" ? "pass" : item.kind === "na" ? "skipped" : "fail"}`}>
+        <strong className="zone-card-title">{item.title}</strong>
+        <span
+          className={`badge badge-${item.kind === "pass" ? "pass" : item.kind === "na" ? "skipped" : "fail"}`}
+        >
           {item.badge}
         </span>
       </header>
-      <strong className="zone-card-title">{item.title}</strong>
-      <p>{item.subtitle}</p>
+      <p className="zone-line">
+        <span className="zone-line-label">{t("resultLineLabel")}</span>
+        {item.resultLine}
+      </p>
+      <p className="zone-line">
+        <span className="zone-line-label">{t("thresholdLineLabel")}</span>
+        {item.thresholdLine}
+      </p>
     </article>
   );
 }
 
-export function ResultZones({
-  evaluations,
-  checks,
-}: {
-  evaluations: GateEvaluation[];
-  checks: CheckResult[];
-}) {
+export function ResultZones({ evaluations }: { evaluations: GateEvaluation[] }) {
   const { locale, t } = useLocale();
 
-  const gateItems: ZoneItem[] = evaluations.map((e) => {
+  const items: ZoneItem[] = evaluations.map((e) => {
     const kind: ZoneKind =
       e.verdict === "达标" ? "pass" : e.verdict === "不适用" ? "na" : "not_pass";
     return {
-      id: `gate-${e.gate_id}`,
+      id: e.gate_id,
       kind,
-      source: "gate",
       title: locale === "en" ? e.label_en : e.label_zh,
-      subtitle: locale === "en" ? e.reason_en : e.reason_zh,
+      resultLine: locale === "en" ? e.result_en : e.result_zh,
+      thresholdLine: locale === "en" ? e.threshold_en : e.threshold_zh,
       badge: verdictLabel(locale, e.verdict),
-      accessClass: t("itemGate"),
     };
   });
 
-  const checkItems: ZoneItem[] = dedupeChecks(checks)
-    .filter((c) => c.access_class !== "hitl")
-    .map((c) => {
-      const status = String(c.status || "pending");
-      const kind = checkZone(status);
-      return {
-        id: `check-${c.tool}`,
-        kind,
-        source: "check" as const,
-        title: c.tool,
-        subtitle: c.summary || "—",
-        badge: checkStatusLabel(locale, status),
-        accessClass: `${t("itemCheck")} · ${c.access_class}`,
-      };
-    });
-
-  const all = [...gateItems, ...checkItems];
-  const left = all.filter((i) => i.kind === "not_pass" || i.kind === "na");
-  const right = all.filter((i) => i.kind === "pass");
+  const left = items.filter((i) => i.kind === "not_pass" || i.kind === "na");
+  const right = items.filter((i) => i.kind === "pass");
   const leftFail = left.filter((i) => i.kind === "not_pass");
   const leftNa = left.filter((i) => i.kind === "na");
 

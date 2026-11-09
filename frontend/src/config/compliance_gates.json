@@ -6,10 +6,6 @@
     "docs/hk-contractor-quals-apis-vs-scraping.md",
     "docs/langgraph-kyc-architecture.md"
   ],
-  "red_light_policy": {
-    "zh": "任何必填项为欠缺、失败或未知 → 立即红灯。",
-    "en": "Any required item missing, failed, or unknown → immediate red flag."
-  },
   "gates": [
     {
       "id": "cr_live_company",
@@ -22,6 +18,8 @@
       "fail_statuses": ["fail", "error"],
       "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
       "unknown_as_red": true,
+      "threshold_zh": "须为公司注册处开放数据可查之现存公司（有 BRN／中英文法定名称）。",
+      "threshold_en": "Must appear as a live company on Companies Registry open data (BRN / bilingual legal name).",
       "gap_hint_zh": "未证明为现存公司（公司注册处开放数据）",
       "gap_hint_en": "Not proven live on Companies Registry open data"
     },
@@ -36,6 +34,8 @@
       "fail_statuses": ["fail", "error"],
       "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
       "unknown_as_red": true,
+      "threshold_zh": "申请电气工种时，须在机电署注册电业承办商名册且有效。",
+      "threshold_en": "If electrical trade is claimed, must be on the EMSD REC register with a valid registration.",
       "gap_hint_zh": "申请电气工种但 EMSD REC 未通过／未知",
       "gap_hint_en": "Electrical trade claimed but EMSD REC missing/failed/unknown"
     },
@@ -51,6 +51,8 @@
       "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
       "unknown_as_red": true,
       "require_data": { "match_count_max": 0 },
+      "threshold_zh": "劳工处近约两年职安健定罪开放数据中，公司名称不得有命中。",
+      "threshold_en": "No matches against Labour Department OSH conviction open data (~2-year window).",
       "gap_hint_zh": "劳工处 OSH 定罪有命中或结果未知",
       "gap_hint_en": "LD OSH conviction hit(s) or result unknown"
     },
@@ -67,6 +69,8 @@
       "unknown_as_red": false,
       "allow_stub_pass": true,
       "require_data": { "match_count_max": 0 },
+      "threshold_zh": "建造业议会 RSTCS 不良／停牌／撤销公告中不得有该公司命中。",
+      "threshold_en": "Must have no CIC RSTCS adverse / suspension / revocation notice hits.",
       "gap_hint_zh": "CIC 停牌／撤销公告有命中",
       "gap_hint_en": "CIC adverse notice hit"
     },
@@ -82,6 +86,8 @@
       "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
       "unknown_as_red": false,
       "allow_stub_pass": true,
+      "threshold_zh": "声称相关工种时，须可核验为 CIC RSTCS 注册分判商（或提供有效注册号）。",
+      "threshold_en": "When related trades are claimed, CIC RSTCS registration must be verifiable (or a valid reg. no. supplied).",
       "gap_hint_zh": "声称相关工种但 CIC RSTCS 状态未确认／失败",
       "gap_hint_en": "Claimed trade but CIC RSTCS status failed/unconfirmed"
     },
@@ -96,6 +102,8 @@
       "fail_statuses": ["fail", "error"],
       "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
       "unknown_as_red": true,
+      "threshold_zh": "申请消防工种时，须为消防处注册消防装置承办商 (RFSIC) 且类别匹配。",
+      "threshold_en": "If fire trade is claimed, must be an FSD RFSIC contractor with matching class(es).",
       "gap_hint_zh": "申请消防工种但 RFSIC 未通过／未知",
       "gap_hint_en": "Fire trade claimed but RFSIC missing/failed/unknown"
     }
