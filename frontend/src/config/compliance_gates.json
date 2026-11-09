@@ -7,8 +7,8 @@
     "docs/langgraph-kyc-architecture.md"
   ],
   "red_light_policy": {
-    "zh": "任何必填项为欠缺、失败或未知 → 立即红灯。待确认 HITL 文件视为欠缺。",
-    "en": "Any required item missing, failed, or unknown → immediate red flag. Pending HITL docs count as gaps until confirmed."
+    "zh": "任何必填项为欠缺、失败或未知 → 立即红灯。",
+    "en": "Any required item missing, failed, or unknown → immediate red flag."
   },
   "gates": [
     {
@@ -98,16 +98,6 @@
       "unknown_as_red": true,
       "gap_hint_zh": "申请消防工种但 RFSIC 未通过／未知",
       "gap_hint_en": "Fire trade claimed but RFSIC missing/failed/unknown"
-    },
-    {
-      "id": "hitl_docs_confirmed",
-      "label_zh": "HITL 必要文件已确认",
-      "label_en": "Required HITL documents confirmed",
-      "required": true,
-      "when": { "always": true },
-      "type": "hitl_pending",
-      "gap_hint_zh": "仍有待上传／确认的 HITL 文件（视为红灯）",
-      "gap_hint_en": "Pending HITL uploads/confirmations count as red"
     }
   ]
 }

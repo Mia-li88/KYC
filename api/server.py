@@ -1,26 +1,21 @@
-"""FastAPI shim: queue + invoke/resume LangGraph KYC agent with thread_id."""
+"""FastAPI shim: queue + invoke LangGraph KYC agent with thread_id (Auto/Semi only)."""
 
 from __future__ import annotations
 
 import json
 import os
-import shutil
-import tempfile
 import uuid
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from kyc_agent.graph import build_kyc_graph, _public_view
 from kyc_agent.models import TradeKind
-from langgraph.types import Command
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
-UPLOAD_ROOT = Path(tempfile.gettempdir()) / "kyc-workbench-uploads"
-UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 
 # Tests only: KYC_ALLOW_OFFLINE=1 lets /runs honor offline=true. Production always live.
 _ALLOW_OFFLINE = os.environ.get("KYC_ALLOW_OFFLINE", "").lower() in ("1", "true", "yes")
@@ -72,18 +67,12 @@ class StartRunRequest(BaseModel):
     )
     offline: bool = False
     """Ignored unless KYC_ALLOW_OFFLINE=1 (tests). Production always runs live HTTP."""
-    require_financials: bool = True
-    require_insurance: bool = True
-    require_safety_docs: bool = True
+    # HITL document uploads removed from workbench — always skip graph HITL pause.
+    require_financials: bool = False
+    require_insurance: bool = False
+    require_safety_docs: bool = False
     require_track_record: bool = False
     thread_id: Optional[str] = None
-
-
-class ResumeRequest(BaseModel):
-    resume: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Payload for Command(resume=…), keyed by pending HITL id",
-    )
 
 
 def _interrupt_payload(raw: dict[str, Any]) -> Optional[dict[str, Any]]:
@@ -232,10 +221,11 @@ def start_run(body: StartRunRequest) -> dict[str, Any]:
         "wsd_plumber_nos": [],
         "trade_reg_nos": [],
         "requested_trades": trades,
-        "require_financials": body.require_financials,
-        "require_insurance": body.require_insurance,
-        "require_safety_docs": body.require_safety_docs,
-        "require_track_record": body.require_track_record,
+        # Workbench has no upload HITL pane — never pause for document intake.
+        "require_financials": False,
+        "require_insurance": False,
+        "require_safety_docs": False,
+        "require_track_record": False,
         "offline": offline,
         "thread_id": thread_id,
         "check_results": [],
@@ -264,41 +254,6 @@ def start_run(body: StartRunRequest) -> dict[str, Any]:
         view["network_errors"] = errors
     _upsert_queue(view)
     return view
-
-
-@app.post("/runs/{thread_id}/resume")
-def resume_run(thread_id: str, body: ResumeRequest) -> dict[str, Any]:
-    """Map HITL upload+confirm UI → Command(resume=…)."""
-    config = {"configurable": {"thread_id": thread_id}}
-    snap = _GRAPH.get_state(config)
-    if not snap.next:
-        raise HTTPException(400, "Thread is not awaiting resume (no interrupt)")
-    try:
-        raw = _GRAPH.invoke(Command(resume=body.resume), config=config)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Live KYC resume failed: {type(exc).__name__}: {exc}",
-        ) from exc
-    view = _enrich(thread_id, dict(raw), seed_only=False)
-    _upsert_queue(view)
-    return view
-
-
-@app.post("/runs/{thread_id}/upload")
-async def upload_file(
-    thread_id: str,
-    pending_id: str = Form(...),
-    file: UploadFile = File(...),
-) -> dict[str, Any]:
-    """Save an uploaded document under a thread/pending folder; return path for resume."""
-    dest_dir = UPLOAD_ROOT / thread_id / pending_id
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    name = Path(file.filename or "upload.bin").name
-    dest = dest_dir / name
-    with dest.open("wb") as out:
-        shutil.copyfileobj(file.file, out)
-    return {"pending_id": pending_id, "path": str(dest), "filename": name}
 
 
 @app.get("/compliance/gates")

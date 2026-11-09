@@ -26,41 +26,18 @@ export function startRun(body: {
   legal_name_zh?: string;
   requested_trades?: string[];
   thread_id?: string;
-  require_track_record?: boolean;
 }): Promise<CompanyDetail> {
-  // Always live — API ignores offline unless KYC_ALLOW_OFFLINE=1 (tests).
+  // Always live Auto/Semi — no HITL document upload path.
   return request("/runs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...body, offline: false }),
+    body: JSON.stringify({
+      ...body,
+      offline: false,
+      require_financials: false,
+      require_insurance: false,
+      require_safety_docs: false,
+      require_track_record: false,
+    }),
   });
-}
-
-export function resumeRun(
-  threadId: string,
-  resume: Record<string, unknown>,
-): Promise<CompanyDetail> {
-  return request(`/runs/${encodeURIComponent(threadId)}/resume`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ resume }),
-  });
-}
-
-export async function uploadFile(
-  threadId: string,
-  pendingId: string,
-  file: File,
-): Promise<{ path: string; filename: string; pending_id: string }> {
-  const form = new FormData();
-  form.append("pending_id", pendingId);
-  form.append("file", file);
-  const res = await fetch(`${API_BASE}/runs/${encodeURIComponent(threadId)}/upload`, {
-    method: "POST",
-    body: form,
-  });
-  if (!res.ok) {
-    throw new Error(await res.text());
-  }
-  return res.json();
 }

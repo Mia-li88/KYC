@@ -23,7 +23,6 @@ const zhCN = {
   unnamedCompany: "未命名公司",
 
   statusRunningAuto: "自动检查中",
-  statusAwaitingHitl: "待人工确认",
   statusSummarized: "已汇总",
   statusQueued: "待实时检查",
 
@@ -47,10 +46,6 @@ const zhCN = {
   itemGate: "门槛",
   itemCheck: "检查",
 
-  groupAuto: "自动 (Auto)",
-  groupSemi: "半自动 (Semi)",
-  groupHitl: "人工 (HITL)",
-
   checkStatusPass: "通过",
   checkStatusFail: "失败",
   checkStatusWarn: "警告",
@@ -59,15 +54,6 @@ const zhCN = {
   checkStatusError: "错误",
   checkStatusAwaitingHuman: "待人工",
   checkStatusStub: "桩实现",
-
-  hitlTitle: "HITL 上传",
-  hitlConfirm: "确认并继续",
-  hitlResuming: "恢复中…",
-  hitlNoCompany: "未选择公司。",
-  hitlInterruptedEmpty: "图已中断，但未返回待办项。",
-  hitlNonePending: "暂无待上传 HITL 文件。中断／恢复对应 LangGraph Command(resume=…)。",
-  hitlUploaded: "已上传：",
-  hitlReviewerConfirmed: "审查员已确认",
 
   apiDownHint: "— 请先在 :8000 启动 API",
 } as const;
@@ -94,7 +80,6 @@ const en: { [K in keyof typeof zhCN]: string } = {
   unnamedCompany: "Unnamed company",
 
   statusRunningAuto: "Running Auto",
-  statusAwaitingHitl: "Awaiting HITL",
   statusSummarized: "Summarized",
   statusQueued: "Queued for live check",
 
@@ -118,10 +103,6 @@ const en: { [K in keyof typeof zhCN]: string } = {
   itemGate: "Gate",
   itemCheck: "Check",
 
-  groupAuto: "Auto",
-  groupSemi: "Semi",
-  groupHitl: "HITL",
-
   checkStatusPass: "pass",
   checkStatusFail: "fail",
   checkStatusWarn: "warn",
@@ -130,16 +111,6 @@ const en: { [K in keyof typeof zhCN]: string } = {
   checkStatusError: "error",
   checkStatusAwaitingHuman: "awaiting human",
   checkStatusStub: "stub",
-
-  hitlTitle: "HITL upload",
-  hitlConfirm: "Confirm & resume",
-  hitlResuming: "Resuming…",
-  hitlNoCompany: "No company selected.",
-  hitlInterruptedEmpty: "Graph is interrupted but no pending items were returned.",
-  hitlNonePending:
-    "No pending HITL documents. Interrupt/resume maps to LangGraph Command(resume=…).",
-  hitlUploaded: "Uploaded: ",
-  hitlReviewerConfirmed: "Reviewer confirmed",
 
   apiDownHint: "— start the API on :8000",
 };
@@ -175,7 +146,7 @@ export function statusLabel(locale: Locale, status: string): string {
     case "running_auto":
       return m.statusRunningAuto;
     case "awaiting_hitl":
-      return m.statusAwaitingHitl;
+      return m.statusRunningAuto;
     case "summarized":
       return m.statusSummarized;
     case "queued":

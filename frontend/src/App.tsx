@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CompanyDetailPane } from "./components/CompanyDetail";
 import { CompanyQueue } from "./components/CompanyQueue";
-import { HitlPanel } from "./components/HitlPanel";
 import { useLocale } from "./i18n/LocaleContext";
 import { getCompany, listCompanies, startRun } from "./lib/api";
 import type { CompanyDetail, QueueCompany } from "./lib/types";
@@ -93,7 +92,6 @@ export default function App() {
         legal_name_en: payload.legal_name_en || undefined,
         legal_name_zh: payload.legal_name_zh || undefined,
         requested_trades: payload.trades,
-        require_track_record: false,
         thread_id: payload.thread_id,
       });
       setDetail(company);
@@ -108,14 +106,6 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }
-
-  function onHitlUpdated(company: CompanyDetail) {
-    setDetail(company);
-    setQueue((prev) => {
-      const others = prev.filter((p) => p.thread_id !== company.thread_id);
-      return [toQueueRow(company), ...others];
-    });
   }
 
   return (
@@ -155,7 +145,7 @@ export default function App() {
 
       {error ? <div className="error-banner">{error}</div> : null}
 
-      <div className="panes">
+      <div className="panes panes-two">
         <CompanyQueue
           companies={queue}
           selectedId={selectedId}
@@ -165,7 +155,6 @@ export default function App() {
           busy={busy}
         />
         <CompanyDetailPane company={detail} />
-        <HitlPanel company={detail} onUpdated={onHitlUpdated} setError={setError} />
       </div>
     </div>
   );

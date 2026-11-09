@@ -68,19 +68,21 @@ export function ResultZones({
     };
   });
 
-  const checkItems: ZoneItem[] = dedupeChecks(checks).map((c) => {
-    const status = String(c.status || "pending");
-    const kind = checkZone(status);
-    return {
-      id: `check-${c.tool}`,
-      kind,
-      source: "check",
-      title: c.tool,
-      subtitle: c.summary || "—",
-      badge: checkStatusLabel(locale, status),
-      accessClass: `${t("itemCheck")} · ${c.access_class}`,
-    };
-  });
+  const checkItems: ZoneItem[] = dedupeChecks(checks)
+    .filter((c) => c.access_class !== "hitl")
+    .map((c) => {
+      const status = String(c.status || "pending");
+      const kind = checkZone(status);
+      return {
+        id: `check-${c.tool}`,
+        kind,
+        source: "check" as const,
+        title: c.tool,
+        subtitle: c.summary || "—",
+        badge: checkStatusLabel(locale, status),
+        accessClass: `${t("itemCheck")} · ${c.access_class}`,
+      };
+    });
 
   const all = [...gateItems, ...checkItems];
   const left = all.filter((i) => i.kind === "not_pass" || i.kind === "na");

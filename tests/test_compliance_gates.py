@@ -76,7 +76,7 @@ def test_gates_config_has_required_examples():
     assert "emsd_rec_if_electrical" in ids
     assert "ld_osh_no_recent_hits" in ids
     assert "cic_rstcs_if_claimed" in ids
-    assert "hitl_docs_confirmed" in ids
+    assert "hitl_docs_confirmed" not in ids
 
 
 def test_red_fixture_is_red():
@@ -107,15 +107,5 @@ def test_pass_fixture_is_green():
     assert not red, gaps
 
 
-def test_awaiting_hitl_is_red():
-    company = json.loads(
-        (
-            Path(__file__).resolve().parents[1]
-            / "api"
-            / "fixtures"
-            / "fixture-awaiting-hitl.json"
-        ).read_text(encoding="utf-8")
-    )
-    red, gaps = evaluate(company)
-    assert red
-    assert "hitl_docs_confirmed" in gaps
+def test_no_hitl_upload_gate():
+    assert all(g.get("type") != "hitl_pending" for g in GATES["gates"])
