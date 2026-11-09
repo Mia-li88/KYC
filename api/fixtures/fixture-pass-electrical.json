@@ -1,0 +1,126 @@
+{
+  "brn": "C1572528",
+  "legal_name_en": "GOLDEN SPARK ENGINEERING LTD",
+  "legal_name_zh": "金光工程有限公司",
+  "aliases": ["GOLDEN SPARK ENGINEERING LTD", "金光工程有限公司"],
+  "requested_trades": ["electrical", "general"],
+  "trade_reg_nos": ["REC-10088"],
+  "auto_done": true,
+  "semi_done": true,
+  "hitl_done": true,
+  "awaiting_human": false,
+  "summary": "BRN=C1572528; EN=GOLDEN SPARK ENGINEERING LTD; ZH=金光工程有限公司; checks=8; pending_hitl=0",
+  "errors": [],
+  "pending_human": [],
+  "check_results": [
+    {
+      "tool": "cr_opendata_lookup",
+      "access_class": "auto",
+      "status": "pass",
+      "summary": "CR open data: live company found (BRN C1572528)",
+      "data": {
+        "found": true,
+        "records": [
+          {
+            "brn": "C1572528",
+            "english_company_name": "GOLDEN SPARK ENGINEERING LTD",
+            "chinese_company_name": "金光工程有限公司",
+            "address_of_registered_office": "Kowloon Bay",
+            "company_type": "Private company limited by shares",
+            "date_of_incorporation": "2008-03-12"
+          }
+        ]
+      },
+      "source_urls": ["https://data.cr.gov.hk/"],
+      "notes": []
+    },
+    {
+      "tool": "emsd_rec_check",
+      "access_class": "auto",
+      "status": "pass",
+      "summary": "EMSD REC registered; expiry 2027-06-30",
+      "data": {
+        "registered": true,
+        "matches": [
+          {
+            "registration_no": "REC-10088",
+            "english_name": "GOLDEN SPARK ENGINEERING LTD",
+            "chinese_name": "金光工程有限公司",
+            "expiry_date": "2027-06-30",
+            "disciplinary_flags": []
+          }
+        ]
+      },
+      "source_urls": [
+        "https://www.emsd.gov.hk/filemanager/en/content_458/dataset/registered_electrical_contractor.json"
+      ],
+      "notes": []
+    },
+    {
+      "tool": "ld_osh_convictions",
+      "access_class": "auto",
+      "status": "pass",
+      "summary": "No LD OSH conviction matches in published ~2-year window",
+      "data": { "match_count": 0, "matches": [] },
+      "source_urls": [
+        "https://www.labour.gov.hk/datagovhk/resource/lsd/lsd-convictionrecords_en.xml"
+      ],
+      "notes": []
+    },
+    {
+      "tool": "cic_rstcs_adverse",
+      "access_class": "auto",
+      "status": "stub",
+      "summary": "CIC adverse notices stub — no matches in sample cache",
+      "data": { "match_count": 0, "rows": [], "stub": true },
+      "source_urls": ["https://www.rstc.cic.hk/en/notice.aspx"],
+      "notes": ["Stub only in demo fixture"]
+    },
+    {
+      "tool": "cic_rstcs_status",
+      "access_class": "semi",
+      "status": "stub",
+      "summary": "CIC RSTCS status stub — sample shape only",
+      "data": {
+        "found": false,
+        "stub": true,
+        "sample_shape": {
+          "registration_no": "R001234",
+          "english_name": "GOLDEN SPARK ENGINEERING LTD",
+          "trades": [{ "group": "Electrical", "code": "E01", "expiry": "2027-12-31" }]
+        }
+      },
+      "source_urls": [
+        "https://rstc.cic.hk/rstc/search_sub_contractors.aspx"
+      ],
+      "notes": ["Portal Semi — not scraped in fixture"]
+    },
+    {
+      "tool": "devb_bd_list_check",
+      "access_class": "semi",
+      "status": "stub",
+      "summary": "DEVB/BD list stub",
+      "data": { "on_devb_list": false, "on_bd_register": false, "stub": true },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "doc_intake_financials",
+      "access_class": "hitl",
+      "status": "pass",
+      "summary": "Financial pack confirmed by reviewer",
+      "data": { "paths": ["/demo/financials.pdf"], "confirmed": true },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "doc_intake_insurance",
+      "access_class": "hitl",
+      "status": "pass",
+      "summary": "EC + TPL certificates confirmed",
+      "data": { "paths": ["/demo/insurance.pdf"], "confirmed": true },
+      "source_urls": [],
+      "notes": []
+    }
+  ]
+}

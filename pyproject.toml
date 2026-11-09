@@ -21,6 +21,11 @@ dependencies = [
 dev = [
   "pytest>=8,<9",
 ]
+api = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "python-multipart>=0.0.9,<1",
+]
 
 [project.scripts]
 kyc-check = "kyc_agent.cli:main"

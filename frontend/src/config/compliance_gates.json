@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "title_zh": "香港建造業分判商合規門檻",
+  "title_en": "HK construction subcontractor compliance gates",
+  "source_docs": [
+    "docs/hk-contractor-quals-apis-vs-scraping.md",
+    "docs/langgraph-kyc-architecture.md"
+  ],
+  "red_light_policy": {
+    "zh": "任何必填項為欠缺、失敗或未知 → 立即紅燈。待確認 HITL 文件視為欠缺。",
+    "en": "Any required item missing, failed, or unknown → immediate red light. Pending HITL docs count as gaps until confirmed."
+  },
+  "gates": [
+    {
+      "id": "cr_live_company",
+      "label_zh": "公司註冊處現存公司",
+      "label_en": "CR live company",
+      "required": true,
+      "when": { "always": true },
+      "tool": "cr_opendata_lookup",
+      "pass_statuses": ["pass"],
+      "fail_statuses": ["fail", "error"],
+      "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
+      "unknown_as_red": true,
+      "gap_hint_zh": "未證明為現存公司（公司註冊處開放數據）",
+      "gap_hint_en": "Not proven live on Companies Registry open data"
+    },
+    {
+      "id": "emsd_rec_if_electrical",
+      "label_zh": "機電署註冊電業承辦商 (REC)",
+      "label_en": "EMSD Registered Electrical Contractor",
+      "required": true,
+      "when": { "trades_any": ["electrical"] },
+      "tool": "emsd_rec_check",
+      "pass_statuses": ["pass"],
+      "fail_statuses": ["fail", "error"],
+      "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
+      "unknown_as_red": true,
+      "gap_hint_zh": "申請電氣工種但 EMSD REC 未通過／未知",
+      "gap_hint_en": "Electrical trade claimed but EMSD REC missing/failed/unknown"
+    },
+    {
+      "id": "ld_osh_no_recent_hits",
+      "label_zh": "勞工處近兩年職安健定罪無命中",
+      "label_en": "No recent LD OSH conviction hits",
+      "required": true,
+      "when": { "always": true },
+      "tool": "ld_osh_convictions",
+      "pass_statuses": ["pass"],
+      "fail_statuses": ["fail", "error"],
+      "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
+      "unknown_as_red": true,
+      "require_data": { "match_count_max": 0 },
+      "gap_hint_zh": "勞工處 OSH 定罪有命中或結果未知",
+      "gap_hint_en": "LD OSH conviction hit(s) or result unknown"
+    },
+    {
+      "id": "cic_adverse_clean",
+      "label_zh": "建造業議會不良／停牌公告無命中",
+      "label_en": "No CIC RSTCS adverse / suspension hits",
+      "required": true,
+      "when": { "always": true },
+      "tool": "cic_rstcs_adverse",
+      "pass_statuses": ["pass"],
+      "fail_statuses": ["fail", "error"],
+      "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
+      "unknown_as_red": false,
+      "allow_stub_pass": true,
+      "require_data": { "match_count_max": 0 },
+      "gap_hint_zh": "CIC 停牌／撤銷公告有命中",
+      "gap_hint_en": "CIC adverse notice hit"
+    },
+    {
+      "id": "cic_rstcs_if_claimed",
+      "label_zh": "CIC RSTCS 註冊分判商（如聲稱）",
+      "label_en": "CIC RSTCS registration if claimed",
+      "required": true,
+      "when": { "trades_any": ["general", "electrical", "plumbing", "fire", "public_works"] },
+      "tool": "cic_rstcs_status",
+      "pass_statuses": ["pass"],
+      "fail_statuses": ["fail", "error"],
+      "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
+      "unknown_as_red": false,
+      "allow_stub_pass": true,
+      "gap_hint_zh": "聲稱相關工種但 CIC RSTCS 狀態未確認／失敗",
+      "gap_hint_en": "Claimed trade but CIC RSTCS status failed/unconfirmed"
+    },
+    {
+      "id": "fsd_rfsic_if_fire",
+      "label_zh": "消防處 RFSIC（如申請消防工種）",
+      "label_en": "FSD RFSIC if fire trade",
+      "required": true,
+      "when": { "trades_any": ["fire"] },
+      "tool": "fsd_rfsic_check",
+      "pass_statuses": ["pass"],
+      "fail_statuses": ["fail", "error"],
+      "unknown_statuses": ["skipped", "pending", "stub", "warn", "awaiting_human"],
+      "unknown_as_red": true,
+      "gap_hint_zh": "申請消防工種但 RFSIC 未通過／未知",
+      "gap_hint_en": "Fire trade claimed but RFSIC missing/failed/unknown"
+    },
+    {
+      "id": "hitl_docs_confirmed",
+      "label_zh": "HITL 必要文件已確認",
+      "label_en": "Required HITL documents confirmed",
+      "required": true,
+      "when": { "always": true },
+      "type": "hitl_pending",
+      "gap_hint_zh": "仍有待上傳／確認的 HITL 文件（視為紅燈）",
+      "gap_hint_en": "Pending HITL uploads/confirmations count as red"
+    }
+  ]
+}

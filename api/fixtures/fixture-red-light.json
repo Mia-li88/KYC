@@ -1,0 +1,116 @@
+{
+  "brn": "C4455667",
+  "legal_name_en": "RISKY SITE SERVICES LTD",
+  "legal_name_zh": "高危地盤服務有限公司",
+  "aliases": ["RISKY SITE SERVICES LTD", "高危地盤服務有限公司"],
+  "requested_trades": ["electrical", "fire", "general"],
+  "trade_reg_nos": [],
+  "auto_done": true,
+  "semi_done": true,
+  "hitl_done": true,
+  "awaiting_human": false,
+  "summary": "BRN=C4455667; checks with OSH hit + missing REC; pending_hitl=0",
+  "errors": [],
+  "pending_human": [],
+  "check_results": [
+    {
+      "tool": "cr_opendata_lookup",
+      "access_class": "auto",
+      "status": "pass",
+      "summary": "CR open data: live company found",
+      "data": { "found": true, "records": [{ "brn": "C4455667" }] },
+      "source_urls": ["https://data.cr.gov.hk/"],
+      "notes": []
+    },
+    {
+      "tool": "emsd_rec_check",
+      "access_class": "auto",
+      "status": "fail",
+      "summary": "Not found on EMSD Registered Electrical Contractor list",
+      "data": { "registered": false, "matches": [] },
+      "source_urls": [
+        "https://www.emsd.gov.hk/filemanager/en/content_458/dataset/registered_electrical_contractor.json"
+      ],
+      "notes": ["Trade electrical claimed"]
+    },
+    {
+      "tool": "ld_osh_convictions",
+      "access_class": "auto",
+      "status": "fail",
+      "summary": "1 LD OSH conviction match in published window",
+      "data": {
+        "match_count": 1,
+        "matches": [
+          {
+            "defendant_name": "RISKY SITE SERVICES LTD",
+            "offence_location": "Tseung Kwan O",
+            "date_of_offence": "2025-02-14",
+            "short_description": "Failure to ensure safety of workplace",
+            "sentence": "Fine $80,000"
+          }
+        ]
+      },
+      "source_urls": [
+        "https://www.labour.gov.hk/datagovhk/resource/lsd/lsd-convictionrecords_en.xml"
+      ],
+      "notes": []
+    },
+    {
+      "tool": "cic_rstcs_adverse",
+      "access_class": "auto",
+      "status": "fail",
+      "summary": "CIC adverse notice: suspension (demo fixture)",
+      "data": {
+        "match_count": 1,
+        "rows": [
+          {
+            "registration_no": "R009999",
+            "company_name": "RISKY SITE SERVICES LTD",
+            "action": "suspension",
+            "period": "2025-06-01 to 2026-05-31",
+            "remarks": "OSH conviction"
+          }
+        ],
+        "stub": false
+      },
+      "source_urls": ["https://www.rstc.cic.hk/en/notice.aspx"],
+      "notes": []
+    },
+    {
+      "tool": "fsd_rfsic_check",
+      "access_class": "semi",
+      "status": "stub",
+      "summary": "FSD RFSIC stub — not verified",
+      "data": { "found": false, "stub": true },
+      "source_urls": ["https://www.hkfsd.gov.hk/rfsic/"],
+      "notes": ["Unknown / unverified → treated as 欠缺 for fire trade"]
+    },
+    {
+      "tool": "cic_rstcs_status",
+      "access_class": "semi",
+      "status": "fail",
+      "summary": "RSTCS registration not confirmed for claimed general trade",
+      "data": { "found": false, "stub": false },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "doc_intake_financials",
+      "access_class": "hitl",
+      "status": "pass",
+      "summary": "Financials confirmed",
+      "data": { "confirmed": true },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "doc_intake_insurance",
+      "access_class": "hitl",
+      "status": "pass",
+      "summary": "Insurance confirmed",
+      "data": { "confirmed": true },
+      "source_urls": [],
+      "notes": []
+    }
+  ]
+}

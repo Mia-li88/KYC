@@ -1,6 +1,6 @@
 # KYC — Hong Kong construction subcontractor screening (LangGraph)
 
-Python + **LangGraph** skeleton for pre-qualifying HK construction subcontractors across **three access patterns**:
+Python + **LangGraph** agent plus a **three-pane review workbench** for pre-qualifying HK construction subcontractors across **Auto / Semi / HITL** access patterns.
 
 | Class | Meaning | Examples |
 |---|---|---|
@@ -8,61 +8,73 @@ Python + **LangGraph** skeleton for pre-qualifying HK construction subcontractor
 | **Semi** | Official portals + human confirm | CIC RSTCS status, FSD RFSIC, WSD plumber, DEVB/BD lists |
 | **HITL** | No public data — upload / manual verify | Financials, EC/TPL insurance, Safety Officer / ISO 45001, track record |
 
-Source-of-truth research (endpoints not invented): see project store doc  
-`docs/hk-contractor-quals-apis-vs-scraping.md` (architecture: `docs/langgraph-kyc-architecture.md`).
+Source-of-truth research (endpoints not invented): see project store docs  
+`docs/hk-contractor-quals-apis-vs-scraping.md` · `docs/langgraph-kyc-architecture.md` · `docs/kyc-workbench-frontend.md`.
 
 ## Layout
 
 ```
-src/kyc_agent/
-  state.py          # typed graph state (BRN, bilingual names, results, HITL flags)
-  models.py         # pydantic tool I/O
-  graph.py          # Auto → Semi → HITL interrupt → summarize
-  tools/auto/       # real HTTP where verified
-  tools/semi/       # portal stubs + sample shapes + ToS notes
-  tools/hitl/       # document intake / awaiting human
+src/kyc_agent/          # LangGraph graph + tools
+api/                    # FastAPI shim (invoke / resume / fixtures)
+frontend/               # Vite React workbench (queue · detail · HITL)
 examples/run_demo.py
 ```
 
-## Setup
+## Setup (backend + frontend)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ".[dev,api]"
+
+cd frontend && npm install && cd ..
 ```
 
-## Run one company check
+## Run frontend + backend together
 
-**Offline / CI-safe** (no live HTTP, Semi stubs, HITL skipped):
+**Terminal A — API (LangGraph + fixtures):**
+
+```bash
+source .venv/bin/activate
+uvicorn api.server:app --reload --host 127.0.0.1 --port 8000
+```
+
+**Terminal B — Workbench UI:**
+
+```bash
+cd frontend && npm run dev
+```
+
+Open http://127.0.0.1:5173 — Vite proxies `/companies`, `/runs`, … to the API.
+
+Demo fixtures load automatically (pass / awaiting HITL / 红灯). Use **Start check** to invoke the real offline graph (HITL interrupt → upload → Confirm & resume → `Command(resume=…)`).
+
+### Compliance / 红灯
+
+Editable gates live in `frontend/src/config/compliance_gates.json` (not hard-coded in JSX). After checks run, the UI marks **达标** vs **欠缺**. Missing / failed / unknown required items → **红灯** immediately; pending HITL docs stay red until confirmed. Gap list cites which tool proved each gap.
+
+## CLI (agent only)
+
+**Offline / CI-safe:**
 
 ```bash
 kyc-check --offline --no-hitl --brn FAKE1234 --name-en "DEMO BUILDING CO LTD" --pretty
-# or
-python -m kyc_agent --offline --no-hitl --brn FAKE1234 --name-en "DEMO BUILDING CO LTD" --pretty
 ```
 
-**Live Auto feeds** (network required; example BRN from CR open-data docs):
+**Live Auto feeds:**
 
 ```bash
 kyc-check --brn C1572528 --trades electrical,general,fire --pretty
 ```
 
-When HITL is enabled (default), the graph **interrupts** until you resume with uploads, e.g.:
+HITL interrupt resume:
 
 ```bash
-# First call pauses at HITL. Then resume on same thread:
 kyc-check --thread-id my-run --resume-json '{"skip_hitl": true}' --pretty
-```
-
-Full interrupt → upload → resume walkthrough:
-
-```bash
 python examples/run_demo.py --offline
-python examples/run_demo.py --brn C1572528   # live
 ```
 
 ## Notes
 
-- Semi tools are **stubs** on purpose: Cloudflare / ASP.NET / PDPO. Interfaces + sample response shapes are ready for adapters.
+- Semi tools are **stubs** on purpose: Cloudflare / ASP.NET / PDPO. Interfaces + sample shapes are ready for adapters.
 - Do **not** scrape Cloudflare-heavy CIC / IA sites in CI.
 - Prefer `httpx` + pydantic; pin `langgraph` / `langchain-core` via `pyproject.toml`.

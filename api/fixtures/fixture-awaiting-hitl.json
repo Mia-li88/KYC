@@ -1,0 +1,127 @@
+{
+  "brn": "C9988776",
+  "legal_name_en": "HARBOUR PIPEWORKS CO LTD",
+  "legal_name_zh": "海港喉務有限公司",
+  "aliases": ["HARBOUR PIPEWORKS CO LTD", "海港喉務有限公司"],
+  "requested_trades": ["plumbing", "general"],
+  "trade_reg_nos": [],
+  "auto_done": true,
+  "semi_done": true,
+  "hitl_done": false,
+  "awaiting_human": true,
+  "summary": null,
+  "errors": [],
+  "interrupt_message": "需要人工上傳／核實文件（財務、保險、安全證明等）。",
+  "pending_human": [
+    {
+      "id": "hitl_financials",
+      "kind": "financials",
+      "prompt": "上傳經審核財務報表／管理帳／銀行融資證明。香港私人公司財務並非公開。",
+      "upload_paths": [],
+      "resolved": false,
+      "resolution": null,
+      "created_at": "2026-11-09"
+    },
+    {
+      "id": "hitl_insurance",
+      "kind": "insurance",
+      "prompt": "上傳僱員補償 (EC) 及第三者責任 (TPL) 保單／證明。",
+      "upload_paths": [],
+      "resolved": false,
+      "resolution": null,
+      "created_at": "2026-11-09"
+    },
+    {
+      "id": "hitl_safety_officer",
+      "kind": "safety_officer",
+      "prompt": "上傳註冊安全主任／安全督導員證明及僱傭關係文件。",
+      "upload_paths": [],
+      "resolved": false,
+      "resolution": null,
+      "created_at": "2026-11-09"
+    },
+    {
+      "id": "hitl_iso_45001",
+      "kind": "iso_45001",
+      "prompt": "上傳 ISO 45001 證書；標明發證機構與證書編號。",
+      "upload_paths": [],
+      "resolved": false,
+      "resolution": null,
+      "created_at": "2026-11-09"
+    }
+  ],
+  "check_results": [
+    {
+      "tool": "cr_opendata_lookup",
+      "access_class": "auto",
+      "status": "pass",
+      "summary": "CR open data: live company found",
+      "data": { "found": true },
+      "source_urls": ["https://data.cr.gov.hk/"],
+      "notes": []
+    },
+    {
+      "tool": "emsd_rec_check",
+      "access_class": "auto",
+      "status": "skipped",
+      "summary": "Electrical trade not requested — EMSD REC not required",
+      "data": { "registered": false, "matches": [] },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "ld_osh_convictions",
+      "access_class": "auto",
+      "status": "pass",
+      "summary": "No LD OSH conviction matches",
+      "data": { "match_count": 0, "matches": [] },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "cic_rstcs_adverse",
+      "access_class": "auto",
+      "status": "stub",
+      "summary": "CIC adverse stub — no matches",
+      "data": { "match_count": 0, "stub": true },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "wsd_plumber_check",
+      "access_class": "semi",
+      "status": "stub",
+      "summary": "WSD plumber directory stub — await nominated LP nos.",
+      "data": { "results": [], "stub": true },
+      "source_urls": [],
+      "notes": ["PDPO purpose-limited portal"]
+    },
+    {
+      "tool": "cic_rstcs_status",
+      "access_class": "semi",
+      "status": "stub",
+      "summary": "CIC RSTCS status stub",
+      "data": { "found": false, "stub": true },
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "doc_intake_financials",
+      "access_class": "hitl",
+      "status": "awaiting_human",
+      "summary": "Awaiting financial document upload",
+      "data": {},
+      "source_urls": [],
+      "notes": []
+    },
+    {
+      "tool": "doc_intake_insurance",
+      "access_class": "hitl",
+      "status": "awaiting_human",
+      "summary": "Awaiting EC/TPL upload",
+      "data": {},
+      "source_urls": [],
+      "notes": []
+    }
+  ]
+}
