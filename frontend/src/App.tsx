@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { CompanyDetailPane } from "./components/CompanyDetail";
 import { CompanyQueue } from "./components/CompanyQueue";
 import { HitlPanel } from "./components/HitlPanel";
+import { useLocale } from "./i18n/LocaleContext";
 import { getCompany, listCompanies, startRun } from "./lib/api";
 import type { CompanyDetail, QueueCompany } from "./lib/types";
 import "./styles/workbench.css";
 
 export default function App() {
+  const { locale, setLocale, t } = useLocale();
   const [queue, setQueue] = useState<QueueCompany[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<CompanyDetail | null>(null);
@@ -42,6 +44,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    document.documentElement.lang = locale === "zh-CN" ? "zh-Hans" : "en";
+  }, [locale]);
+
+  useEffect(() => {
     (async () => {
       try {
         const rows = await refreshQueue();
@@ -50,13 +56,11 @@ export default function App() {
         }
       } catch (err) {
         setError(
-          err instanceof Error
-            ? `${err.message} — start the API on :8000`
-            : String(err),
+          err instanceof Error ? `${err.message} ${t("apiDownHint")}` : String(err),
         );
       }
     })();
-  }, [refreshQueue, loadDetail]);
+  }, [refreshQueue, loadDetail, t]);
 
   async function onSelect(threadId: string) {
     setError(null);
@@ -120,20 +124,33 @@ export default function App() {
       <header className="topbar">
         <div className="brand-block">
           <div className="brand">
-            KYC <span>Workbench</span>
+            {t("brand")} <span>{t("brandAccent")}</span>
           </div>
-          <p className="tagline">
-            Hong Kong construction subcontractor review — Auto / Semi / HITL checks with
-            compliance gating (達標 · 欠缺 · 紅燈).
-          </p>
+          <p className="tagline">{t("tagline")}</p>
         </div>
         <div className="top-actions">
+          <div className="lang-toggle" role="group" aria-label={t("langToggleAria")}>
+            <button
+              type="button"
+              className={`btn lang-btn ${locale === "zh-CN" ? "active" : ""}`}
+              onClick={() => setLocale("zh-CN")}
+            >
+              {t("langZh")}
+            </button>
+            <button
+              type="button"
+              className={`btn lang-btn ${locale === "en" ? "active" : ""}`}
+              onClick={() => setLocale("en")}
+            >
+              {t("langEn")}
+            </button>
+          </div>
           <button
             className="btn"
             type="button"
             onClick={() => refreshQueue().catch((e) => setError(String(e)))}
           >
-            Refresh queue
+            {t("refreshQueue")}
           </button>
         </div>
       </header>

@@ -1,17 +1,21 @@
-import type { CompanyDetail as Company } from "../lib/types";
+import { useLocale } from "../i18n/LocaleContext";
+import { overallLabel } from "../i18n/locales";
 import { evaluateCompliance } from "../lib/compliance";
+import type { CompanyDetail as Company } from "../lib/types";
 import { CheckCards } from "./CheckCards";
 import { CompliancePanel } from "./CompliancePanel";
 import { StatusPill } from "./StatusPill";
 
 export function CompanyDetailPane({ company }: { company: Company | null }) {
+  const { locale, t } = useLocale();
+
   if (!company) {
     return (
       <main className="pane">
         <div className="pane-head">
-          <h2>Company detail</h2>
+          <h2>{t("detailTitle")}</h2>
         </div>
-        <p className="empty">Select a company from the queue, or start a new check.</p>
+        <p className="empty">{t("detailEmpty")}</p>
       </main>
     );
   }
@@ -21,18 +25,16 @@ export function CompanyDetailPane({ company }: { company: Company | null }) {
   return (
     <main className="pane">
       <div className="pane-head">
-        <h2>Company detail</h2>
+        <h2>{t("detailTitle")}</h2>
         <StatusPill status={company.status} />
       </div>
       <div className="detail">
         <header className="identity">
           <div className="identity-top">
             <h1>{company.legal_name_en || "—"}</h1>
-            {report.red ? (
-              <span className="badge badge-fail">紅燈</span>
-            ) : (
-              <span className="badge badge-pass">達標</span>
-            )}
+            <span className={`badge ${report.red ? "badge-fail" : "badge-pass"}`}>
+              {overallLabel(locale, report.overall)}
+            </span>
           </div>
           {company.legal_name_zh ? <p className="zh">{company.legal_name_zh}</p> : null}
           <div className="meta-row">
@@ -40,10 +42,10 @@ export function CompanyDetailPane({ company }: { company: Company | null }) {
               BRN <code>{company.brn || "—"}</code>
             </span>
             <span>
-              Trades{" "}
+              {t("trades")}{" "}
               <code>{(company.requested_trades || []).join(", ") || "—"}</code>
             </span>
-            {company.fixture ? <span>Fixture demo</span> : null}
+            {company.fixture ? <span>{t("fixtureDemo")}</span> : null}
           </div>
         </header>
 

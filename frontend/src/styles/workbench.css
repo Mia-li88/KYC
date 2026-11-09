@@ -96,6 +96,32 @@ select {
   gap: 0.55rem;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+}
+
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.lang-btn {
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0.45rem 0.7rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lang-btn.active {
+  background: var(--ink);
+  color: var(--paper-2);
+}
+
+.lang-btn:hover {
+  transform: none;
 }
 
 .btn {

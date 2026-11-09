@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocale } from "../i18n/LocaleContext";
 import type { QueueCompany } from "../lib/types";
 import { StatusPill } from "./StatusPill";
 
@@ -17,16 +18,17 @@ interface Props {
 }
 
 export function CompanyQueue({ companies, selectedId, onSelect, onStart, busy }: Props) {
+  const { t } = useLocale();
   const [brn, setBrn] = useState("FAKE1234");
   const [en, setEn] = useState("DEMO BUILDING CO LTD");
-  const [zh, setZh] = useState("示範建築有限公司");
+  const [zh, setZh] = useState("示范建筑有限公司");
   const [trades, setTrades] = useState("electrical,general");
   const [offline, setOffline] = useState(true);
 
   return (
     <aside className="pane">
       <div className="pane-head">
-        <h2>Company queue</h2>
+        <h2>{t("queueTitle")}</h2>
         <span>{companies.length}</span>
       </div>
 
@@ -43,21 +45,21 @@ export function CompanyQueue({ companies, selectedId, onSelect, onStart, busy }:
           });
         }}
       >
-        <strong style={{ fontSize: "0.85rem" }}>Start check</strong>
-        <input value={brn} onChange={(e) => setBrn(e.target.value)} placeholder="BRN" />
-        <input value={en} onChange={(e) => setEn(e.target.value)} placeholder="English name" />
-        <input value={zh} onChange={(e) => setZh(e.target.value)} placeholder="中文名稱" />
+        <strong style={{ fontSize: "0.85rem" }}>{t("startCheck")}</strong>
+        <input value={brn} onChange={(e) => setBrn(e.target.value)} placeholder={t("placeholderBrn")} />
+        <input value={en} onChange={(e) => setEn(e.target.value)} placeholder={t("placeholderNameEn")} />
+        <input value={zh} onChange={(e) => setZh(e.target.value)} placeholder={t("placeholderNameZh")} />
         <input
           value={trades}
           onChange={(e) => setTrades(e.target.value)}
-          placeholder="trades: electrical,general"
+          placeholder={t("placeholderTrades")}
         />
         <label className="confirm">
           <input type="checkbox" checked={offline} onChange={(e) => setOffline(e.target.checked)} />
-          Offline (no live HTTP)
+          {t("offline")}
         </label>
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? "Running…" : "Run Auto → Semi → HITL"}
+          {busy ? t("runBusy") : t("runSubmit")}
         </button>
       </form>
 
@@ -70,7 +72,7 @@ export function CompanyQueue({ companies, selectedId, onSelect, onStart, busy }:
               onClick={() => onSelect(c.thread_id)}
             >
               <span className="queue-brn">{c.brn || "—"}</span>
-              <span className="queue-name">{c.legal_name_en || "Unnamed company"}</span>
+              <span className="queue-name">{c.legal_name_en || t("unnamedCompany")}</span>
               {c.legal_name_zh ? <span className="queue-name-zh">{c.legal_name_zh}</span> : null}
               <StatusPill status={c.status} />
             </button>

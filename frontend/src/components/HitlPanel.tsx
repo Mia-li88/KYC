@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import type { CompanyDetail, PendingHumanItem } from "../lib/types";
+import { useLocale } from "../i18n/LocaleContext";
 import { resumeRun, uploadFile } from "../lib/api";
+import type { CompanyDetail, PendingHumanItem } from "../lib/types";
 
 interface Props {
   company: CompanyDetail | null;
@@ -15,6 +16,7 @@ interface Draft {
 }
 
 export function HitlPanel({ company, onUpdated, setError }: Props) {
+  const { t } = useLocale();
   const pending = useMemo(
     () => (company?.pending_human || []).filter((p) => !p.resolved),
     [company],
@@ -50,7 +52,6 @@ export function HitlPanel({ company, onUpdated, setError }: Props) {
     setError(null);
     try {
       if (company.fixture) {
-        // Fixture threads have no live interrupt — mark local pending resolved for demo UX.
         const updated: CompanyDetail = {
           ...company,
           awaiting_human: false,
@@ -96,19 +97,22 @@ export function HitlPanel({ company, onUpdated, setError }: Props) {
   return (
     <aside className="pane hitl-pane">
       <div className="pane-head">
-        <h2>HITL upload</h2>
-        <button className="btn btn-accent" type="button" disabled={!canConfirm || busy} onClick={confirmAll}>
-          {busy ? "Resuming…" : "Confirm & resume"}
+        <h2>{t("hitlTitle")}</h2>
+        <button
+          className="btn btn-accent"
+          type="button"
+          disabled={!canConfirm || busy}
+          onClick={confirmAll}
+        >
+          {busy ? t("hitlResuming") : t("hitlConfirm")}
         </button>
       </div>
       <div className="hitl-body">
         {!company ? (
-          <p className="empty">No company selected.</p>
+          <p className="empty">{t("hitlNoCompany")}</p>
         ) : pending.length === 0 ? (
           <p className="empty">
-            {company.awaiting_human
-              ? "Graph is interrupted but no pending items were returned."
-              : "No pending HITL documents. Interrupt/resume maps to LangGraph Command(resume=…)."}
+            {company.awaiting_human ? t("hitlInterruptedEmpty") : t("hitlNonePending")}
           </p>
         ) : (
           <>
@@ -129,7 +133,10 @@ export function HitlPanel({ company, onUpdated, setError }: Props) {
                     onChange={(e) => onFile(item, e.target.files?.[0] || null)}
                   />
                   {draft.filename ? (
-                    <span style={{ fontSize: "0.8rem" }}>Uploaded: {draft.filename}</span>
+                    <span style={{ fontSize: "0.8rem" }}>
+                      {t("hitlUploaded")}
+                      {draft.filename}
+                    </span>
                   ) : null}
                   <label className="confirm">
                     <input
@@ -142,7 +149,7 @@ export function HitlPanel({ company, onUpdated, setError }: Props) {
                         }))
                       }
                     />
-                    Reviewer confirmed
+                    {t("hitlReviewerConfirmed")}
                   </label>
                 </article>
               );
