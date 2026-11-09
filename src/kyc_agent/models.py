@@ -53,8 +53,11 @@ class CRLookupInput(BaseModel):
     brn: Optional[str] = None
     company_name: Optional[str] = None
     name_match: str = Field(
-        default="equal",
-        description="Comp_name match mode: equal | begins_with",
+        default="begins_with",
+        description=(
+            "Comp_name match mode. CR open data returns HTTP 400 for equal; "
+            "tool always uses begins_with with progressive prefixes."
+        ),
     )
 
 
