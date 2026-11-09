@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kyc-agent"
+version = "0.1.0"
+description = "Hong Kong construction subcontractor KYC agent (LangGraph skeleton)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Mia Li" }]
+dependencies = [
+  "langgraph>=1.2,<1.3",
+  "langchain-core>=1.2,<2",
+  "httpx>=0.27,<0.29",
+  "pydantic>=2.7,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+kyc-check = "kyc_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
